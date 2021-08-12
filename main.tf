@@ -7,21 +7,42 @@ terraform {
   }
 }
  
+#Azure provider
 provider "azurerm" {
   features {}
 }
  
-module "storage_account" {
-  source    = "./modules/storage-account"
+# NSG module
+module "nsg" {
+    count = 4 
+    source = "./modules/nsg"
  
-  saname    = "arundevcloudops0001"
-  rgname    = "demo08"
-}
+    nsgname    = "nsg${count.index}"
+    rgname    = "demo10"
+    location  = "northeurope"
  
-module "storage_account2" {
-  source    = "./modules/storage-account"
- 
-  saname    = "arundevcloudops0002"
-  rgname    = "demo08"
-  location  = "westeurope"
+    nsg_rule =[
+    {
+    name                       = "http"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+    },
+    {
+     name                       = "ssh"
+    priority                   = 101
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "22"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+    }
+]
 }
